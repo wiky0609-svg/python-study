@@ -27,17 +27,27 @@ function save() {
   catch { $('saveNote').textContent = '이 브라우저에서는 저장할 수 없어요. 페이지를 닫기 전에 답과 코드를 따로 복사해 주세요.'; }
 }
 function navigation() {
-  $('dayList').innerHTML = lessons.map(l => {
+  const week = Math.ceil(day / 5);
+  const weekLessons = lessons.filter(l => Math.ceil(l.id / 5) === week);
+  $('weekTitle').textContent = `WEEK ${String(week).padStart(2, '0')}`;
+  $('weekTopic').textContent = week === 1 ? '코드와 친해지기' : '여러 값을 다루기';
+  document.querySelectorAll('[data-week]').forEach(el => {
+    const selected = Number(el.dataset.week) === week;
+    el.classList.toggle('selected', selected);
+    el.setAttribute('aria-pressed', String(selected));
+    el.onclick = () => selectDay((Number(el.dataset.week) - 1) * 5 + 1);
+  });
+  $('dayList').innerHTML = weekLessons.map(l => {
     const done = l.id === day ? state.done : readState(l.id).done;
     return `<button class="day ${l.id === day ? 'active' : ''}" data-day="${l.id}" ${l.id === day ? 'aria-current="step"' : ''}><b>${String(l.id).padStart(2, '0')}</b><span class="day-copy">${l.title}<span>${done ? '학습 완료 ✓' : `약 ${l.minutes}분 · 3쪽`}</span></span></button>`;
   }).join('');
   document.querySelectorAll('[data-day]').forEach(el => el.onclick = () => selectDay(Number(el.dataset.day)));
   $('daySelect').innerHTML = lessons.map(l => `<option value="${l.id}">${l.id}일 차 · ${l.title}</option>`).join('');
   $('daySelect').value = String(day);
-  $('weekProgress').textContent = `1주차 ${lessons.filter(l => l.id === day ? state.done : readState(l.id).done).length} / 5일 완료`;
+  $('weekProgress').textContent = `${week}주차 ${weekLessons.filter(l => l.id === day ? state.done : readState(l.id).done).length} / 5일 완료`;
 }
 function pageMarkup(page) {
-  return `<div class="paper-kicker"><span>DAY ${String(day).padStart(2, '0')} · ${lesson().title}</span><span>${lesson().minutes} MIN</span></div>${lesson().pages[page]}<div class="paper-bottom"><span>하루 파이썬 · 1주차 데이터 노트</span><span>${page + 1} / 3</span></div>`;
+  return `<div class="paper-kicker"><span>DAY ${String(day).padStart(2, '0')} · ${lesson().title}</span><span>${lesson().minutes} MIN</span></div>${lesson().pages[page]}<div class="paper-bottom"><span>하루 파이썬 · ${Math.ceil(day / 5)}주차 데이터 노트</span><span>${page + 1} / 3</span></div>`;
 }
 function fillFields(root) {
   root.querySelectorAll('[data-answer]').forEach(el => { el.value = typeof state.answers[el.dataset.answer] === 'string' ? state.answers[el.dataset.answer] : ''; });
@@ -75,8 +85,8 @@ function render() {
 function completion() {
   if (!$('complete')) return;
   $('complete').textContent = state.done ? '학습 완료 ✓' : '오늘의 학습 마치기';
-  $('completion').textContent = state.done ? (day === 5 ? '1주차 마지막 학습을 마쳤어요. 다음은 여러 값을 함께 다루는 리스트를 배울 거예요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
-  if ($('nextDay')) $('nextDay').hidden = !state.done || day === 5;
+  $('completion').textContent = state.done ? (day === 10 ? '2주차를 마쳤어요. 다음 주에는 표 형태의 데이터를 다룰 준비를 해요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
+  if ($('nextDay')) $('nextDay').hidden = !state.done || day === lessons[lessons.length - 1].id;
 }
 function go(page) { if (page < 0 || page > 2) return; state.page = page; save(); render(); $('paper').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 function selectDay(id) {
@@ -151,6 +161,8 @@ function run() {
         const hints = {
           SyntaxError: '따옴표와 괄호가 짝을 이루는지 확인하세요.',
           NameError: '변수에 값을 먼저 넣었나요? 이름의 철자와 대소문자도 확인하세요.',
+          IndexError: '리스트의 첫 위치는 0이에요. 값이 5개라면 인덱스는 0~4인지 확인하세요.',
+          IndentationError: 'if·else·for 줄 다음에는 들여쓰기가 필요해요. 안쪽으로 한 단계 들어갈 때마다 공백 네 칸을 넣어보세요.',
           TypeError: '문자열과 숫자를 함께 더했나요? 숫자로 계산하려면 자료형을 맞춰주세요.',
           ValueError: '숫자로 바꿀 수 있는 문자열인가요? 단위나 쉼표가 포함됐는지 확인하세요.',
           ZeroDivisionError: '0으로 나눌 수는 없어요. 나누는 숫자를 확인하세요.'
