@@ -29,10 +29,12 @@ self.onmessage = async ({ data }) => {
     py = await runtime();
     send('loading', { message: '필요한 도구 준비 중…' });
     // This loads packages bundled with Pyodide, including pandas and dependencies.
+    const packageErrors = [];
     await py.loadPackagesFromImports(data.code, {
       messageCallback: () => {},
-      errorCallback: () => {}
+      errorCallback: message => packageErrors.push(message)
     });
+    if (packageErrors.length) throw new Error(packageErrors.join('\n'));
     send('loading', { message: '실습 파일 준비 중…' });
     await prepareFiles(py, data.datasets || []);
   } catch (error) {
@@ -45,12 +47,40 @@ self.onmessage = async ({ data }) => {
   try {
     send('ready');
     globals = py.runPython('dict()');
+    if (Object.hasOwn(py.loadedPackages, 'matplotlib')) {
+      let plotCount = 0;
+      globals.set('_emit_plot', (png, title) => {
+        if (plotCount++ < 8) send('plot', { png, title });
+        else if (plotCount === 9) send('stdout', { text: '한 번에 그래프 8개까지 표시해요. 코드를 나누어 실행해 주세요.' });
+      });
+      py.runPython(`
+import matplotlib as _mpl
+_mpl.use("Agg")
+import matplotlib.pyplot as _plt
+import io as _io
+import base64 as _base64
+_plt.close("all")
+_plt.rcdefaults()
+def _show_plots(*args, **kwargs):
+    for _number in _plt.get_fignums():
+        _fig = _plt.figure(_number)
+        _buffer = _io.BytesIO()
+        _fig.savefig(_buffer, format="png", dpi=120, bbox_inches="tight")
+        _title = "; ".join(ax.get_title() for ax in _fig.axes if ax.get_title())
+        _emit_plot(_base64.b64encode(_buffer.getvalue()).decode("ascii"), _title)
+        _plt.close(_fig)
+_plt.show = _show_plots
+`, { globals });
+    }
     const value = await py.runPythonAsync(data.code, { globals });
     if (value?.destroy) value.destroy();
     send('done');
   } catch (error) {
     send('error', { error: String(error.message || error) });
   } finally {
+    if (Object.hasOwn(py.loadedPackages, 'matplotlib')) {
+      py.runPython('import matplotlib.pyplot as _cleanup_plt; _cleanup_plt.close("all")');
+    }
     globals?.destroy();
   }
 };

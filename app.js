@@ -30,7 +30,7 @@ function navigation() {
   const week = Math.ceil(day / 5);
   const weekLessons = lessons.filter(l => Math.ceil(l.id / 5) === week);
   $('weekTitle').textContent = `WEEK ${String(week).padStart(2, '0')}`;
-  $('weekTopic').textContent = ['코드와 친해지기', '여러 값을 다루기', '표 데이터 시작하기', '데이터 정리와 요약'][week - 1];
+  $('weekTopic').textContent = ['코드와 친해지기', '여러 값을 다루기', '표 데이터 시작하기', '데이터 정리와 요약', '그래프로 표현하기'][week - 1];
   document.querySelectorAll('[data-week]').forEach(el => {
     const selected = Number(el.dataset.week) === week;
     el.classList.toggle('selected', selected);
@@ -68,7 +68,7 @@ function render() {
   const files = (lesson().datasets || []).filter(name => fileInfo[name]);
   $('datasets').hidden = files.length === 0;
   $('datasets').innerHTML = '<b>실습 파일 · 자동 준비</b>' + files.map(name => `<a href="data/${name}" download="${name}">${fileInfo[name][0]} CSV 받기</a><span>${fileInfo[name][1]}</span>`).join('');
-  $('runtimeNote').textContent = day >= 13 ? 'pandas는 첫 실행 시 자동으로 준비돼요. 잠시 기다려 주세요.' : '코드를 바꿔 실행하고 예상 결과와 비교해 보세요.';
+  $('runtimeNote').textContent = day >= 21 ? '그래프 도구는 첫 실행 시 준비돼요. plt.show()로 그림을 표시해요.' : day >= 13 ? 'pandas는 첫 실행 시 자동으로 준비돼요. 잠시 기다려 주세요.' : '코드를 바꿔 실행하고 예상 결과와 비교해 보세요.';
   $('prev').disabled = state.page === 0;
   $('next').disabled = state.page === 2;
   $('dots').innerHTML = [0, 1, 2].map(i => `<button aria-label="${i + 1}쪽으로 이동" ${i === state.page ? 'aria-current="page"' : ''} class="${i === state.page ? 'selected' : ''}" data-page="${i}"></button>`).join('');
@@ -95,7 +95,7 @@ function render() {
 function completion() {
   if (!$('complete')) return;
   $('complete').textContent = state.done ? '학습 완료 ✓' : '오늘의 학습 마치기';
-  $('completion').textContent = state.done ? (day === 20 ? '4주차를 마쳤어요. 다음 주에는 정리한 데이터를 그래프로 표현해요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
+  $('completion').textContent = state.done ? (day === 25 ? '5주차를 마쳤어요. 다음 주에는 나만의 분석 프로젝트를 완성해요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
   if ($('nextDay')) $('nextDay').hidden = !state.done || day === lessons[lessons.length - 1].id;
 }
 function go(page) { if (page < 0 || page > 2) return; state.page = page; save(); render(); $('paper').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
@@ -111,6 +111,7 @@ function lines() {
   $('lineNums').style.transform = `translateY(-${$('code').scrollTop}px)`;
 }
 function clearOutput(message) {
+  $('plots').replaceChildren();
   $('output').classList.remove('error'); $('output').textContent = message; $('status').textContent = '실행 대기';
   $('help').querySelector('b').textContent = '실행할 때 기억해요';
   $('help').querySelector('p').textContent = '실행할 때마다 입력 칸 전체를 처음부터 계산해요. 필요한 변수도 같은 입력 칸에 넣어주세요. 첫 실행에는 준비 시간이 필요해요.';
@@ -138,6 +139,7 @@ function stop(message) { if (worker) worker.terminate(); worker = null; $('statu
 $('stop').onclick = () => stop('실행을 중지했어요. 코드를 수정한 뒤 다시 실행할 수 있어요.');
 function run() {
   if (busy) return Promise.resolve({ status: 'busy' });
+  $('plots').replaceChildren();
   busy = true; $('run').disabled = true; $('stop').hidden = false;
   $('output').classList.remove('error'); buffer = ''; $('output').textContent = '';
   $('status').textContent = worker ? '실행 중' : '파이썬 준비 중…';
@@ -164,9 +166,20 @@ function run() {
         buffer += d.text + '\n'; if (buffer.length > 16000) buffer = buffer.slice(-16000);
         $('output').textContent = buffer;
       }
+      if (d.type === 'plot' && typeof d.png === 'string' && /^[A-Za-z0-9+/=]+$/.test(d.png)) {
+        const figure = document.createElement('figure');
+        const img = document.createElement('img');
+        img.src = 'data:image/png;base64,' + d.png;
+        img.alt = d.title || '실행한 코드로 만든 그래프';
+        const caption = document.createElement('figcaption');
+        const label = document.createElement('span'); label.textContent = d.title || '그래프';
+        const link = document.createElement('a'); link.href = img.src;
+        link.download = `day${day}-chart-${$('plots').children.length + 1}.png`; link.textContent = 'PNG 받기';
+        caption.append(label, link); figure.append(img, caption); $('plots').append(figure);
+      }
       if (d.type === 'done') {
         $('status').textContent = '실행 완료';
-        if (!buffer) $('output').textContent = '실행은 끝났지만 출력이 없어요. print()를 사용해 보세요.';
+        if (!buffer) $('output').textContent = $('plots').children.length ? '그래프가 준비됐어요. 아래에서 확인하세요.' : '출력이 없어요. 글자는 print(), 그래프는 plt.show()로 표시해 보세요.';
         $('help').querySelector('b').textContent = '결과를 비교해 보세요';
         $('help').querySelector('p').textContent = '학습지의 예상 결과와 비교해요. 숫자를 바꾸었다면 어떤 값이 달라졌는지도 설명해 보세요.';
         finish();
