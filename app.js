@@ -1,21 +1,190 @@
-const $=id=>document.getElementById(id);
-const examples=['print("나의 첫 데이터 분석")\nprint(4500 + 8000)','print(5000 + 8000)','\u0023 교통비 3000원과 간식비 2500원을 더해 출력하세요.\n'];
-let state={page:0,code:examples[0],answers:{},checks:{},done:false};try{const s=JSON.parse(localStorage.getItem('daily-python-01'));if(s&&typeof s.code==='string')state={...state,...s,page:Math.min(2,Math.max(0,Number(s.page)||0))};}catch{}
-function save(){try{localStorage.setItem('daily-python-01',JSON.stringify(state));}catch{$('status').textContent='브라우저 저장 불가';}}
-const pages=[`<h1>컴퓨터에게<br>첫 계산을 부탁해요.</h1><p class="intro">커피 한 잔 4,500원, 점심 한 끼 8,000원.<br>오늘 쓴 돈을 파이썬으로 더해볼까요?</p><div class="goal"><b>오늘의 목표</b><span>코드를 실행하고, 숫자를 바꿔 다시 실행할 수 있어요.</span></div><h2 class="section-title"><span>1</span> 코드를 실행해 보세요</h2><p>오른쪽 입력 칸이 코드를 쓰는 공간이에요. 아래 예제를 불러온 뒤 <b>실행하기</b>를 눌러보세요.</p><div class="example"><pre>print("나의 첫 데이터 분석")\nprint(4500 + 8000)</pre><button class="load" data-example="0">이 예제로 실습하기</button></div><ul class="terms"><li><code>print()</code> 괄호 안의 내용을 화면에 보여줘요.</li><li><code>" "</code> 글자는 따옴표로 감싸요.</li><li><code>+</code> 숫자와 숫자를 더해요.</li></ul><h2 class="section-title"><span>2</span> 결과를 비교해 보세요</h2><div class="example"><pre>나의 첫 데이터 분석\n12500</pre></div><p>첫 줄에는 문장이, 둘째 줄에는 계산 결과가 나와요.<br>내 화면에도 같은 결과가 나타났나요?</p>`,
-`<h1>숫자 하나를 바꾸면<br>결과도 달라질까요?</h1><p class="intro">코드를 모두 외울 필요는 없어요.<br>작은 부분을 바꾸며 차이를 발견해 보세요.</p><div class="goal"><b>오늘의 실험</b><span>실행 전에 예상하고, 실행 후에 확인해요.</span></div><h2 class="section-title"><span>3</span> 커피값이 올랐어요</h2><p>커피값이 4,500원에서 <b>5,000원</b>으로 바뀌었어요. 점심값은 그대로 8,000원이에요.</p><p><label for="a-predict">바뀐 합계는 얼마일까요? 먼저 예상해 보세요.</label></p><textarea class="answer" id="a-predict" data-answer="predict" placeholder="예상한 금액과 이유를 적어보세요."></textarea><div class="example"><pre>print(5000 + 8000)</pre><button class="load" data-example="1">바뀐 예제로 실습하기</button></div><p>코드를 수정한 뒤에는 <b>실행하기</b>를 다시 눌러야 새로운 결과가 나타나요.</p><details class="hint"><summary>결과와 설명 확인하기</summary><p>결과는 <b>13000</b>이에요. 커피값이 500원 올랐으니 합계도 12500에서 13000으로 500 증가해요.</p></details><h2 class="section-title"><span>4</span> 결과를 내 말로 설명해요</h2><p><label for="a-change">어느 숫자를 바꿨고, 결과는 어떻게 달라졌나요?</label></p><textarea class="answer" id="a-change" data-answer="change" placeholder="나는 …을 바꿨고, 결과는 …"></textarea><details class="hint"><summary>함께 공부한다면</summary><p>한 사람이 금액을 바꾸면 다른 사람은 실행 결과를 예상해요. 답을 확인한 뒤 역할을 바꿔보세요.</p></details>`,
-`<h1>이번에는<br>혼자 해볼 차례예요.</h1><p class="intro">조금 막혀도 괜찮아요.<br>힌트를 하나씩 열어보며 완성해 보세요.</p><div class="goal"><b>나의 첫 미션</b><span>두 금액의 합계를 화면에 출력해요.</span></div><h2 class="section-title"><span>5</span> 오늘의 작은 문제</h2><p>교통비 <b>3,000원</b>과 간식비 <b>2,500원</b>을 썼어요. 두 금액의 합계를 출력하는 코드를 작성하세요.</p><button class="load" data-example="2">미션 코드로 시작하기</button><details class="hint"><summary>힌트 1 · 무엇을 사용하나요?</summary><p>화면에 보여줄 때는 print(), 숫자를 더할 때는 +를 사용해요.</p></details><details class="hint"><summary>힌트 2 · 코드의 모양이 궁금해요</summary><p><code>print(첫 번째 금액 + 두 번째 금액)</code>에서 두 금액을 숫자로 바꿔보세요.</p></details><details class="hint"><summary>정답과 해설 확인하기</summary><div class="example"><pre>print(3000 + 2500)</pre></div><p>결과는 <b>5500</b>이에요. 괄호 안의 덧셈을 계산한 다음 print()가 화면에 보여줘요. 계산할 숫자에는 따옴표를 붙이지 않아요.</p></details><h2 class="section-title"><span>6</span> 오늘의 배움을 남겨요</h2><label for="a-learn">코드를 바꾼 뒤 결과를 바꾸려면 무엇을 해야 하나요?</label><textarea class="answer" id="a-learn" data-answer="learn" placeholder="한 문장으로 적어보세요."></textarea><div class="checks"><label><input type="checkbox" data-check="run"> 코드를 직접 실행했어요.</label><label><input type="checkbox" data-check="change"> 숫자를 바꾸고 결과를 확인했어요.</label><label><input type="checkbox" data-check="solve"> 두 금액의 합계를 출력했어요.</label></div><button class="complete" id="complete">오늘의 학습 마치기</button><p class="success" id="completion" role="status"></p>`];
-function render(){const p=state.page;$('paper').innerHTML=`<div class="paper-kicker"><span>DAY 01 · 첫 번째 코드</span><span>30 MIN</span></div>${pages[p]}<div class="paper-bottom"><span>하루 파이썬 · 나의 첫 데이터 노트</span><span>0${p+1}</span></div>`;$('pageLabel').textContent=`0${p+1} / 03`;$('prev').disabled=p===0;$('next').disabled=p===2;$('dots').innerHTML=[0,1,2].map(i=>`<button aria-label="${i+1}쪽으로 이동" ${i===p?'aria-current="page"':''} class="${i===p?'selected':''}" data-page="${i}"></button>`).join('');document.querySelectorAll('[data-answer]').forEach(el=>{el.value=state.answers[el.dataset.answer]||'';el.oninput=()=>{state.answers[el.dataset.answer]=el.value;save()}});document.querySelectorAll('[data-check]').forEach(el=>{el.checked=!!state.checks[el.dataset.check];el.onchange=()=>{state.checks[el.dataset.check]=el.checked;save()}});document.querySelectorAll('[data-example]').forEach(el=>el.onclick=()=>{state.code=examples[Number(el.dataset.example)];$('code').value=state.code;lines();save();$('code').focus();if(innerWidth<801)$('code').scrollIntoView({behavior:'smooth',block:'center'})});document.querySelectorAll('[data-page]').forEach(el=>el.onclick=()=>go(Number(el.dataset.page)));if($('complete')){$('completion').textContent=state.done?'첫 번째 학습을 마쳤어요. 수고했어요!':'';$('complete').onclick=()=>{if(!['run','change','solve'].every(k=>state.checks[k])){$('completion').textContent='위의 세 가지를 확인하고 체크해 주세요.';return}state.done=true;save();$('completion').textContent='첫 번째 학습을 마쳤어요. 수고했어요!';$('complete').textContent='학습 완료 ✓'}}}
-function go(p){state.page=p;save();render();$('paper').scrollIntoView({behavior:'smooth',block:'start'})}
-$('prev').onclick=()=>go(state.page-1);$('next').onclick=()=>go(state.page+1);
-$('code').value=state.code;function lines(){$('lineNums').textContent=$('code').value.split('\n').map((_,i)=>i+1).join('\n')}$('code').oninput=()=>{state.code=$('code').value;lines();save()};$('code').onscroll=()=>{$('lineNums').style.transform=`translateY(-${$('code').scrollTop}px)`};$('code').onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run()}if(e.key==='Tab'){e.preventDefault();const t=e.target;t.setRangeText('    ',t.selectionStart,t.selectionEnd,'end');t.dispatchEvent(new Event('input'))}};
-$('reset').onclick=()=>{state.code=examples[state.page];$('code').value=state.code;lines();save();$('output').textContent='예제를 불러왔어요. 실행하기를 눌러보세요.';$('output').classList.remove('error')};
-let worker=null,busy=false,timer=null,resolveRun=null,buffer='';
-function finish(){busy=false;clearTimeout(timer);$('run').disabled=false;$('stop').hidden=true;if(resolveRun){resolveRun({status:$('status').textContent,output:$('output').textContent});resolveRun=null}}
-function stop(message){if(worker)worker.terminate();worker=null;$('status').textContent='실행 중지';$('output').textContent=message;finish()}
-$('stop').onclick=()=>stop('실행을 중지했어요. 코드를 수정한 뒤 다시 실행할 수 있어요.');
-function run(){if(busy)return Promise.resolve({status:'busy'});busy=true;$('run').disabled=true;$('stop').hidden=false;$('output').classList.remove('error');buffer='';$('output').textContent='';$('status').textContent=worker?'실행 중':'파이썬 준비 중…';const promise=new Promise(r=>resolveRun=r);timer=setTimeout(()=>stop('준비 또는 실행 시간이 길어져 중지했어요. 인터넷 연결과 코드를 확인한 뒤 다시 실행해 주세요.'),90000);if(!worker){worker=new Worker('worker.js',{type:'module'});worker.onerror=()=>{if(worker)worker.terminate();worker=null;$('status').textContent='연결 확인 필요';$('output').textContent='파이썬을 불러오지 못했어요. 인터넷 연결을 확인한 후 실행하기를 다시 눌러주세요.';$('output').classList.add('error');finish()};worker.onmessage=({data:d})=>{if(d.type==='ready'){$('status').textContent='실행 중'}if(d.type==='stdout'){buffer+=d.text+'\n';if(buffer.length>16000)buffer=buffer.slice(-16000);$('output').textContent=buffer}if(d.type==='done'){$('status').textContent='실행 완료';if(!buffer)$('output').textContent='실행은 끝났지만 출력이 없어요. print()를 사용해 보세요.';finish()}if(d.type==='error'){$('status').textContent='코드 확인 필요';$('output').classList.add('error');$('output').textContent=(buffer?buffer+'\n':'')+d.error;$('help').querySelector('b').textContent='이 부분부터 살펴보세요';$('help').querySelector('p').textContent=d.error.includes('SyntaxError')?'따옴표와 괄호가 짝을 이루는지 확인하세요.':d.error.includes('NameError')?'이름의 철자와 대소문자를 확인하세요. print는 소문자로 적어요.':'오류의 마지막 줄을 읽고, 예제와 다른 부분을 하나씩 확인해 보세요.';finish()}}}worker.postMessage({code:$('code').value});return promise}
-$('run').onclick=run;
-$('print').onclick=()=>{const old=state.page;const container=document.createElement('div');container.id='printAll';for(let i=0;i<3;i++){state.page=i;render();const clone=$('paper').cloneNode(true);clone.removeAttribute('id');clone.querySelectorAll('textarea').forEach(el=>{el.textContent=el.value});clone.querySelectorAll('input').forEach(el=>{if(el.checked)el.setAttribute('checked','')});container.appendChild(clone)}state.page=old;render();document.body.appendChild(container);const style=document.createElement('style');style.textContent='#printAll{display:none}@media print{.workspace{display:none!important}#printAll{display:block}}';document.head.appendChild(style);window.print();container.remove();style.remove()};
-render();lines();
-if(document.modelContext?.registerTool){try{Promise.resolve(document.modelContext.registerTool({name:'set_practice_code',description:'파이썬 실습 코드를 변경합니다. 실행하지는 않습니다.',inputSchema:{type:'object',properties:{code:{type:'string',maxLength:10000}},required:['code'],additionalProperties:false},annotations:{readOnlyHint:false},execute(input){if(typeof input.code!=='string'||input.code.length>10000)throw new Error('코드는 10000자 이하 문자열이어야 합니다.');state.code=input.code;$('code').value=input.code;lines();save();return {updated:true}}})).catch(()=>{})}catch{}}
+'use strict';
+const $ = id => document.getElementById(id);
+const lessons = window.LESSONS;
+const keyFor = id => `daily-python-${String(id).padStart(2, '0')}`;
+let day = 1;
+try { const n = Number(localStorage.getItem('daily-python-current')); if (lessons.some(l => l.id === n)) day = n; } catch {}
+let worker = null, busy = false, timer = null, resolveRun = null, buffer = '';
+let state = readState(day);
+function lesson() { return lessons.find(l => l.id === day); }
+function readState(id) {
+  const item = lessons.find(l => l.id === id);
+  const fallback = { page: 0, code: item.examples[0], answers: {}, checks: {}, done: false };
+  try {
+    const old = JSON.parse(localStorage.getItem(keyFor(id)));
+    if (old && typeof old === 'object') return {
+      page: Number.isInteger(old.page) ? Math.min(2, Math.max(0, old.page)) : 0,
+      code: typeof old.code === 'string' ? old.code : fallback.code,
+      answers: old.answers && typeof old.answers === 'object' ? old.answers : {},
+      checks: old.checks && typeof old.checks === 'object' ? old.checks : {},
+      done: old.done === true
+    };
+  } catch {}
+  return fallback;
+}
+function save() {
+  try { localStorage.setItem(keyFor(day), JSON.stringify(state)); localStorage.setItem('daily-python-current', String(day)); }
+  catch { $('saveNote').textContent = '이 브라우저에서는 저장할 수 없어요. 페이지를 닫기 전에 답과 코드를 따로 복사해 주세요.'; }
+}
+function navigation() {
+  $('dayList').innerHTML = lessons.map(l => {
+    const done = l.id === day ? state.done : readState(l.id).done;
+    return `<button class="day ${l.id === day ? 'active' : ''}" data-day="${l.id}" ${l.id === day ? 'aria-current="step"' : ''}><b>${String(l.id).padStart(2, '0')}</b><span class="day-copy">${l.title}<span>${done ? '학습 완료 ✓' : `약 ${l.minutes}분 · 3쪽`}</span></span></button>`;
+  }).join('');
+  document.querySelectorAll('[data-day]').forEach(el => el.onclick = () => selectDay(Number(el.dataset.day)));
+  $('daySelect').innerHTML = lessons.map(l => `<option value="${l.id}">${l.id}일 차 · ${l.title}</option>`).join('');
+  $('daySelect').value = String(day);
+  $('weekProgress').textContent = `1주차 ${lessons.filter(l => l.id === day ? state.done : readState(l.id).done).length} / 5일 완료`;
+}
+function pageMarkup(page) {
+  return `<div class="paper-kicker"><span>DAY ${String(day).padStart(2, '0')} · ${lesson().title}</span><span>${lesson().minutes} MIN</span></div>${lesson().pages[page]}<div class="paper-bottom"><span>하루 파이썬 · 1주차 데이터 노트</span><span>${page + 1} / 3</span></div>`;
+}
+function fillFields(root) {
+  root.querySelectorAll('[data-answer]').forEach(el => { el.value = typeof state.answers[el.dataset.answer] === 'string' ? state.answers[el.dataset.answer] : ''; });
+  root.querySelectorAll('[data-check]').forEach(el => { el.checked = !!state.checks[el.dataset.check]; });
+}
+function render() {
+  $('paper').innerHTML = pageMarkup(state.page);
+  $('pageLabel').textContent = `0${state.page + 1} / 03`;
+  $('readingTitle').textContent = `${day}일 차 · ${lesson().title}`;
+  $('editorFile').textContent = `day${String(day).padStart(2, '0')}.py`;
+  $('labDay').textContent = `DAY ${String(day).padStart(2, '0')}`;
+  $('prev').disabled = state.page === 0;
+  $('next').disabled = state.page === 2;
+  $('dots').innerHTML = [0, 1, 2].map(i => `<button aria-label="${i + 1}쪽으로 이동" ${i === state.page ? 'aria-current="page"' : ''} class="${i === state.page ? 'selected' : ''}" data-page="${i}"></button>`).join('');
+  fillFields($('paper'));
+  $('paper').querySelectorAll('[data-answer]').forEach(el => el.oninput = () => { state.answers[el.dataset.answer] = el.value; save(); });
+  $('paper').querySelectorAll('[data-check]').forEach(el => el.onchange = () => {
+    state.checks[el.dataset.check] = el.checked;
+    if (!el.checked) state.done = false;
+    save(); completion(); navigation();
+  });
+  $('paper').querySelectorAll('[data-example]').forEach(el => el.onclick = () => {
+    setCode(lesson().examples[Number(el.dataset.example)]);
+    $('code').focus();
+    if (innerWidth < 801) $('code').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  document.querySelectorAll('[data-page]').forEach(el => el.onclick = () => go(Number(el.dataset.page)));
+  if ($('complete')) $('complete').onclick = () => {
+    if (!['run', 'change', 'solve'].every(k => state.checks[k])) { $('completion').textContent = '위의 세 가지를 확인하고 체크해 주세요.'; return; }
+    state.done = true; save(); completion(); navigation();
+  };
+  if ($('nextDay')) $('nextDay').onclick = () => selectDay(day + 1);
+  completion(); navigation();
+}
+function completion() {
+  if (!$('complete')) return;
+  $('complete').textContent = state.done ? '학습 완료 ✓' : '오늘의 학습 마치기';
+  $('completion').textContent = state.done ? (day === 5 ? '1주차 마지막 학습을 마쳤어요. 다음은 여러 값을 함께 다루는 리스트를 배울 거예요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
+  if ($('nextDay')) $('nextDay').hidden = !state.done || day === 5;
+}
+function go(page) { if (page < 0 || page > 2) return; state.page = page; save(); render(); $('paper').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+function selectDay(id) {
+  if (!lessons.some(l => l.id === id) || id === day) return;
+  if (busy) stop('날짜를 바꾸어 실행을 중지했어요.');
+  save(); day = id; state = readState(day); save();
+  $('code').value = state.code; lines(); render(); clearOutput('이 날짜의 코드를 실행해 보세요.');
+  $('paper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function lines() {
+  $('lineNums').textContent = $('code').value.split('\n').map((_, i) => i + 1).join('\n');
+  $('lineNums').style.transform = `translateY(-${$('code').scrollTop}px)`;
+}
+function clearOutput(message) {
+  $('output').classList.remove('error'); $('output').textContent = message; $('status').textContent = '실행 대기';
+  $('help').querySelector('b').textContent = '실행할 때 기억해요';
+  $('help').querySelector('p').textContent = '실행할 때마다 입력 칸 전체를 처음부터 계산해요. 필요한 변수도 같은 입력 칸에 넣어주세요. 첫 실행에는 준비 시간이 필요해요.';
+}
+function setCode(code) {
+  if (busy) stop('예제를 바꾸어 실행을 중지했어요.');
+  state.code = code; $('code').value = code; $('code').scrollTop = 0; lines(); save(); clearOutput('예제를 불러왔어요. 실행하기를 눌러보세요.');
+}
+$('prev').onclick = () => go(state.page - 1);
+$('next').onclick = () => go(state.page + 1);
+$('daySelect').onchange = e => selectDay(Number(e.target.value));
+$('code').value = state.code;
+$('code').oninput = () => { state.code = $('code').value; lines(); save(); };
+$('code').onscroll = lines;
+$('code').onkeydown = e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
+  if (e.key === 'Tab') { e.preventDefault(); const t = e.target; t.setRangeText('    ', t.selectionStart, t.selectionEnd, 'end'); t.dispatchEvent(new Event('input')); }
+};
+$('reset').onclick = () => setCode(lesson().examples[state.page]);
+function finish() {
+  busy = false; clearTimeout(timer); $('run').disabled = false; $('stop').hidden = true;
+  if (resolveRun) { resolveRun({ status: $('status').textContent, output: $('output').textContent }); resolveRun = null; }
+}
+function stop(message) { if (worker) worker.terminate(); worker = null; $('status').textContent = '실행 중지'; $('output').textContent = message; finish(); }
+$('stop').onclick = () => stop('실행을 중지했어요. 코드를 수정한 뒤 다시 실행할 수 있어요.');
+function run() {
+  if (busy) return Promise.resolve({ status: 'busy' });
+  busy = true; $('run').disabled = true; $('stop').hidden = false;
+  $('output').classList.remove('error'); buffer = ''; $('output').textContent = '';
+  $('status').textContent = worker ? '실행 중' : '파이썬 준비 중…';
+  const promise = new Promise(r => resolveRun = r);
+  timer = setTimeout(() => stop('준비 또는 실행 시간이 길어져 중지했어요. 인터넷 연결과 코드를 확인한 뒤 다시 실행해 주세요.'), 90000);
+  if (!worker) {
+    worker = new Worker('worker.js', { type: 'module' });
+    worker.onerror = () => {
+      if (worker) worker.terminate(); worker = null;
+      $('status').textContent = '연결 확인 필요';
+      $('output').textContent = '파이썬을 불러오지 못했어요. 인터넷 연결을 확인한 후 실행하기를 다시 눌러주세요.';
+      $('output').classList.add('error'); finish();
+    };
+    worker.onmessage = ({ data: d }) => {
+      if (d.type === 'ready') $('status').textContent = '실행 중';
+      if (d.type === 'stdout') {
+        buffer += d.text + '\n'; if (buffer.length > 16000) buffer = buffer.slice(-16000);
+        $('output').textContent = buffer;
+      }
+      if (d.type === 'done') {
+        $('status').textContent = '실행 완료';
+        if (!buffer) $('output').textContent = '실행은 끝났지만 출력이 없어요. print()를 사용해 보세요.';
+        $('help').querySelector('b').textContent = '결과를 비교해 보세요';
+        $('help').querySelector('p').textContent = '학습지의 예상 결과와 비교해요. 숫자를 바꾸었다면 어떤 값이 달라졌는지도 설명해 보세요.';
+        finish();
+      }
+      if (d.type === 'error') {
+        $('status').textContent = '코드 확인 필요'; $('output').classList.add('error');
+        $('output').textContent = (buffer ? buffer + '\n' : '') + d.error;
+        $('help').querySelector('b').textContent = '이 부분부터 살펴보세요';
+        const hints = {
+          SyntaxError: '따옴표와 괄호가 짝을 이루는지 확인하세요.',
+          NameError: '변수에 값을 먼저 넣었나요? 이름의 철자와 대소문자도 확인하세요.',
+          TypeError: '문자열과 숫자를 함께 더했나요? 숫자로 계산하려면 자료형을 맞춰주세요.',
+          ValueError: '숫자로 바꿀 수 있는 문자열인가요? 단위나 쉼표가 포함됐는지 확인하세요.',
+          ZeroDivisionError: '0으로 나눌 수는 없어요. 나누는 숫자를 확인하세요.'
+        };
+        $('help').querySelector('p').textContent = Object.entries(hints).find(([k]) => d.error.includes(k))?.[1] || '오류의 마지막 줄을 읽고 예제와 다른 부분을 하나씩 확인해 보세요.';
+        finish();
+      }
+    };
+  }
+  worker.postMessage({ code: $('code').value }); return promise;
+}
+$('run').onclick = run;
+let printContainer = null;
+function cleanupPrint() { printContainer?.remove(); printContainer = null; }
+window.addEventListener('afterprint', cleanupPrint);
+$('print').onclick = () => {
+  cleanupPrint(); printContainer = document.createElement('div'); printContainer.id = 'printAll';
+  for (let p = 0; p < 3; p++) {
+    const sheet = document.createElement('article'); sheet.className = 'paper'; sheet.innerHTML = pageMarkup(p); fillFields(sheet);
+    sheet.querySelectorAll('textarea').forEach(el => { const text = document.createElement('div'); text.className = 'printed-answer'; text.textContent = el.value || ' '; el.replaceWith(text); });
+    sheet.querySelectorAll('details').forEach(el => { el.open = true; });
+    sheet.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+    printContainer.appendChild(sheet);
+  }
+  document.body.appendChild(printContainer); window.print();
+};
+render(); lines();
+if (document.modelContext?.registerTool) {
+  try {
+    Promise.resolve(document.modelContext.registerTool({
+      name: 'set_practice_code', description: '현재 날짜의 파이썬 실습 코드를 변경합니다. 실행하지는 않습니다.',
+      inputSchema: { type: 'object', properties: { code: { type: 'string', maxLength: 10000 } }, required: ['code'], additionalProperties: false },
+      annotations: { readOnlyHint: false },
+      execute(input) { if (typeof input?.code !== 'string' || input.code.length > 10000) throw new Error('코드는 10000자 이하 문자열이어야 합니다.'); setCode(input.code); return { updated: true, day }; }
+    })).catch(() => {});
+  } catch {}
+}
