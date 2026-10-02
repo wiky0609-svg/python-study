@@ -30,7 +30,7 @@ function navigation() {
   const week = Math.ceil(day / 5);
   const weekLessons = lessons.filter(l => Math.ceil(l.id / 5) === week);
   $('weekTitle').textContent = `WEEK ${String(week).padStart(2, '0')}`;
-  $('weekTopic').textContent = week === 1 ? '코드와 친해지기' : '여러 값을 다루기';
+  $('weekTopic').textContent = ['코드와 친해지기', '여러 값을 다루기', '표 데이터 시작하기'][week - 1];
   document.querySelectorAll('[data-week]').forEach(el => {
     const selected = Number(el.dataset.week) === week;
     el.classList.toggle('selected', selected);
@@ -59,6 +59,8 @@ function render() {
   $('readingTitle').textContent = `${day}일 차 · ${lesson().title}`;
   $('editorFile').textContent = `day${String(day).padStart(2, '0')}.py`;
   $('labDay').textContent = `DAY ${String(day).padStart(2, '0')}`;
+  $('datasets').hidden = day < 14;
+  $('runtimeNote').textContent = day >= 13 ? 'pandas는 첫 실행 시 자동으로 준비돼요. 잠시 기다려 주세요.' : '코드를 바꿔 실행하고 예상 결과와 비교해 보세요.';
   $('prev').disabled = state.page === 0;
   $('next').disabled = state.page === 2;
   $('dots').innerHTML = [0, 1, 2].map(i => `<button aria-label="${i + 1}쪽으로 이동" ${i === state.page ? 'aria-current="page"' : ''} class="${i === state.page ? 'selected' : ''}" data-page="${i}"></button>`).join('');
@@ -85,7 +87,7 @@ function render() {
 function completion() {
   if (!$('complete')) return;
   $('complete').textContent = state.done ? '학습 완료 ✓' : '오늘의 학습 마치기';
-  $('completion').textContent = state.done ? (day === 10 ? '2주차를 마쳤어요. 다음 주에는 표 형태의 데이터를 다룰 준비를 해요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
+  $('completion').textContent = state.done ? (day === 15 ? '3주차를 마쳤어요. 다음 주에는 표에서 필요한 기록을 고르고 정리해요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
   if ($('nextDay')) $('nextDay').hidden = !state.done || day === lessons[lessons.length - 1].id;
 }
 function go(page) { if (page < 0 || page > 2) return; state.page = page; save(); render(); $('paper').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
@@ -143,6 +145,13 @@ function run() {
     };
     worker.onmessage = ({ data: d }) => {
       if (d.type === 'ready') $('status').textContent = '실행 중';
+      if (d.type === 'loading') $('status').textContent = d.message;
+      if (d.type === 'setup-error') {
+        worker?.terminate(); worker = null;
+        $('status').textContent = '준비 실패 · 다시 실행 가능';
+        $('output').classList.add('error'); $('output').textContent = d.error;
+        finish();
+      }
       if (d.type === 'stdout') {
         buffer += d.text + '\n'; if (buffer.length > 16000) buffer = buffer.slice(-16000);
         $('output').textContent = buffer;
@@ -160,11 +169,14 @@ function run() {
         $('help').querySelector('b').textContent = '이 부분부터 살펴보세요';
         const hints = {
           SyntaxError: '따옴표와 괄호가 짝을 이루는지 확인하세요.',
-          NameError: '변수에 값을 먼저 넣었나요? 이름의 철자와 대소문자도 확인하세요.',
+          NameError: '변수나 함수를 사용하기 전에 정의했나요? 이름의 철자와 대소문자도 확인하세요.',
+          KeyError: '딕셔너리의 키나 표의 열 이름을 확인하세요. 대소문자까지 정확히 일치해야 해요.',
+          FileNotFoundError: '실습 파일 이름은 study_week.csv와 reading_week.csv예요. 이름과 따옴표를 확인하세요.',
+          ModuleNotFoundError: 'import한 이름의 철자를 확인하세요. pandas는 준비가 끝나면 사용할 수 있어요.',
           IndexError: '리스트의 첫 위치는 0이에요. 값이 5개라면 인덱스는 0~4인지 확인하세요.',
           IndentationError: 'if·else·for 줄 다음에는 들여쓰기가 필요해요. 안쪽으로 한 단계 들어갈 때마다 공백 네 칸을 넣어보세요.',
           TypeError: '문자열과 숫자를 함께 더했나요? 숫자로 계산하려면 자료형을 맞춰주세요.',
-          ValueError: '숫자로 바꿀 수 있는 문자열인가요? 단위나 쉼표가 포함됐는지 확인하세요.',
+          ValueError: '숫자 변환이라면 단위·쉼표를, 표를 만드는 중이라면 각 리스트의 길이가 같은지 확인하세요.',
           ZeroDivisionError: '0으로 나눌 수는 없어요. 나누는 숫자를 확인하세요.'
         };
         $('help').querySelector('p').textContent = Object.entries(hints).find(([k]) => d.error.includes(k))?.[1] || '오류의 마지막 줄을 읽고 예제와 다른 부분을 하나씩 확인해 보세요.';
@@ -172,7 +184,7 @@ function run() {
       }
     };
   }
-  worker.postMessage({ code: $('code').value }); return promise;
+  worker.postMessage({ code: $('code').value, datasets: lesson().datasets || [] }); return promise;
 }
 $('run').onclick = run;
 let printContainer = null;
