@@ -1,0 +1,16 @@
+session_id,week,day,topic,minutes
+S01,1,Mon,Python,20
+S02,1,Tue,SQL,30
+S03,1,Wed,Python,40
+S04,1,Thu,SQL,25
+S05,1,Fri,Python,35
+S06,1,Sat,SQL,30
+S07,2,Mon,Python,30
+S08,2,Tue,SQL,40
+S09,2,Wed,Python,50
+S10,2,Thu,SQL,35
+S11,2,Fri,Python,45
+S12,2,Sat,SQL,40
+S03,1,Wed,Python,40
+S13,2,Sun,Python,
+S14,2,Sun,SQL,pending

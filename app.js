@@ -30,7 +30,7 @@ function navigation() {
   const week = Math.ceil(day / 5);
   const weekLessons = lessons.filter(l => Math.ceil(l.id / 5) === week);
   $('weekTitle').textContent = `WEEK ${String(week).padStart(2, '0')}`;
-  $('weekTopic').textContent = ['코드와 친해지기', '여러 값을 다루기', '표 데이터 시작하기', '데이터 정리와 요약', '그래프로 표현하기'][week - 1];
+  $('weekTopic').textContent = ['코드와 친해지기', '여러 값을 다루기', '표 데이터 시작하기', '데이터 정리와 요약', '그래프로 표현하기', '나의 첫 분석 프로젝트'][week - 1];
   document.querySelectorAll('[data-week]').forEach(el => {
     const selected = Number(el.dataset.week) === week;
     el.classList.toggle('selected', selected);
@@ -60,6 +60,7 @@ function render() {
   $('editorFile').textContent = `day${String(day).padStart(2, '0')}.py`;
   $('labDay').textContent = `DAY ${String(day).padStart(2, '0')}`;
   const fileInfo = {
+    'study_project.csv': ['최종 프로젝트 학습 기록', '가상 데이터 · 15행 · 한 행은 학습 세션 · 시간 단위: 분'],
     'study_week.csv': ['공부 기록', '가상 데이터 · 월~금 · 시간 단위: 분'],
     'reading_week.csv': ['독서 기록', '가상 데이터 · 월~금 · 시간 단위: 분'],
     'spending_week.csv': ['지출 기록', '가상 데이터 · 8건의 거래 · 금액 단위: 원'],
@@ -68,7 +69,7 @@ function render() {
   const files = (lesson().datasets || []).filter(name => fileInfo[name]);
   $('datasets').hidden = files.length === 0;
   $('datasets').innerHTML = '<b>실습 파일 · 자동 준비</b>' + files.map(name => `<a href="data/${name}" download="${name}">${fileInfo[name][0]} CSV 받기</a><span>${fileInfo[name][1]}</span>`).join('');
-  $('runtimeNote').textContent = day >= 21 ? '그래프 도구는 첫 실행 시 준비돼요. plt.show()로 그림을 표시해요.' : day >= 13 ? 'pandas는 첫 실행 시 자동으로 준비돼요. 잠시 기다려 주세요.' : '코드를 바꿔 실행하고 예상 결과와 비교해 보세요.';
+  $('runtimeNote').textContent = ((day >= 21 && day <= 25) || day >= 29) ? '그래프 도구는 첫 실행 시 준비돼요. plt.show()로 그림을 표시해요.' : day >= 13 ? 'pandas는 첫 실행 시 자동으로 준비돼요. 잠시 기다려 주세요.' : '코드를 바꿔 실행하고 예상 결과와 비교해 보세요.';
   $('prev').disabled = state.page === 0;
   $('next').disabled = state.page === 2;
   $('dots').innerHTML = [0, 1, 2].map(i => `<button aria-label="${i + 1}쪽으로 이동" ${i === state.page ? 'aria-current="page"' : ''} class="${i === state.page ? 'selected' : ''}" data-page="${i}"></button>`).join('');
@@ -89,13 +90,30 @@ function render() {
     if (!['run', 'change', 'solve'].every(k => state.checks[k])) { $('completion').textContent = '위의 세 가지를 확인하고 체크해 주세요.'; return; }
     state.done = true; save(); completion(); navigation();
   };
+  if ($('downloadReport')) $('downloadReport').onclick = downloadReport;
   if ($('nextDay')) $('nextDay').onclick = () => selectDay(day + 1);
   completion(); navigation();
+}
+function downloadReport() {
+  const sections = [
+    ['report-question', '1. 분석 질문'], ['report-method', '2. 자료와 방법'],
+    ['report-result', '3. 결과'], ['report-limit', '4. 한계'], ['report-next', '5. 다음 시도']
+  ];
+  const text = ['하루 파이썬 · 나의 첫 분석 보고서',
+    ...sections.map(([key, title]) => `${title}\n${state.answers[key] || '(아직 작성하지 않았어요)'}`),
+    '실습 코드\n' + $('code').value,
+    '실습 코드에는 다운로드 시점의 편집기 내용이 들어 있어요. 그래프는 PNG로 별도 저장합니다.'
+  ].join('\n\n');
+  const blob = new Blob(['\uFEFF', text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a'); link.href = url; link.download = 'my-python-analysis.txt';
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 function completion() {
   if (!$('complete')) return;
   $('complete').textContent = state.done ? '학습 완료 ✓' : '오늘의 학습 마치기';
-  $('completion').textContent = state.done ? (day === 25 ? '5주차를 마쳤어요. 다음 주에는 나만의 분석 프로젝트를 완성해요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
+  $('completion').textContent = state.done ? (day === 30 ? `30일 차를 마쳤어요. 전체 ${lessons.filter(l => l.id === day ? state.done : readState(l.id).done).length} / 30일 완료 · 보고서와 그래프를 보관해 보세요.` : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
   if ($('nextDay')) $('nextDay').hidden = !state.done || day === lessons[lessons.length - 1].id;
 }
 function go(page) { if (page < 0 || page > 2) return; state.page = page; save(); render(); $('paper').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
