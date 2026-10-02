@@ -1,0 +1,9 @@
+id,day,category,amount
+T01,Mon,Food,8000
+T02,Mon,Transport,3000
+T03,Tue,Food,9000
+T04,Tue,Cafe,4500
+T05,Wed,Transport,3000
+T06,Thu,Food,10000
+T07,Fri,Cafe,5000
+T08,Fri,Food,8500

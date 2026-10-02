@@ -30,7 +30,7 @@ function navigation() {
   const week = Math.ceil(day / 5);
   const weekLessons = lessons.filter(l => Math.ceil(l.id / 5) === week);
   $('weekTitle').textContent = `WEEK ${String(week).padStart(2, '0')}`;
-  $('weekTopic').textContent = ['코드와 친해지기', '여러 값을 다루기', '표 데이터 시작하기'][week - 1];
+  $('weekTopic').textContent = ['코드와 친해지기', '여러 값을 다루기', '표 데이터 시작하기', '데이터 정리와 요약'][week - 1];
   document.querySelectorAll('[data-week]').forEach(el => {
     const selected = Number(el.dataset.week) === week;
     el.classList.toggle('selected', selected);
@@ -59,7 +59,15 @@ function render() {
   $('readingTitle').textContent = `${day}일 차 · ${lesson().title}`;
   $('editorFile').textContent = `day${String(day).padStart(2, '0')}.py`;
   $('labDay').textContent = `DAY ${String(day).padStart(2, '0')}`;
-  $('datasets').hidden = day < 14;
+  const fileInfo = {
+    'study_week.csv': ['공부 기록', '가상 데이터 · 월~금 · 시간 단위: 분'],
+    'reading_week.csv': ['독서 기록', '가상 데이터 · 월~금 · 시간 단위: 분'],
+    'spending_week.csv': ['지출 기록', '가상 데이터 · 8건의 거래 · 금액 단위: 원'],
+    'spending_raw.csv': ['정리 전 지출 기록', '가상 데이터 · 중복·미확인 금액 포함 · 단위: 원']
+  };
+  const files = (lesson().datasets || []).filter(name => fileInfo[name]);
+  $('datasets').hidden = files.length === 0;
+  $('datasets').innerHTML = '<b>실습 파일 · 자동 준비</b>' + files.map(name => `<a href="data/${name}" download="${name}">${fileInfo[name][0]} CSV 받기</a><span>${fileInfo[name][1]}</span>`).join('');
   $('runtimeNote').textContent = day >= 13 ? 'pandas는 첫 실행 시 자동으로 준비돼요. 잠시 기다려 주세요.' : '코드를 바꿔 실행하고 예상 결과와 비교해 보세요.';
   $('prev').disabled = state.page === 0;
   $('next').disabled = state.page === 2;
@@ -87,7 +95,7 @@ function render() {
 function completion() {
   if (!$('complete')) return;
   $('complete').textContent = state.done ? '학습 완료 ✓' : '오늘의 학습 마치기';
-  $('completion').textContent = state.done ? (day === 15 ? '3주차를 마쳤어요. 다음 주에는 표에서 필요한 기록을 고르고 정리해요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
+  $('completion').textContent = state.done ? (day === 20 ? '4주차를 마쳤어요. 다음 주에는 정리한 데이터를 그래프로 표현해요.' : `${day}일 차 학습을 마쳤어요. 수고했어요!`) : '';
   if ($('nextDay')) $('nextDay').hidden = !state.done || day === lessons[lessons.length - 1].id;
 }
 function go(page) { if (page < 0 || page > 2) return; state.page = page; save(); render(); $('paper').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
@@ -171,7 +179,7 @@ function run() {
           SyntaxError: '따옴표와 괄호가 짝을 이루는지 확인하세요.',
           NameError: '변수나 함수를 사용하기 전에 정의했나요? 이름의 철자와 대소문자도 확인하세요.',
           KeyError: '딕셔너리의 키나 표의 열 이름을 확인하세요. 대소문자까지 정확히 일치해야 해요.',
-          FileNotFoundError: '실습 파일 이름은 study_week.csv와 reading_week.csv예요. 이름과 따옴표를 확인하세요.',
+          FileNotFoundError: '이 날짜에 제공된 실습 파일 이름을 예제와 비교하세요. 철자와 따옴표를 확인해요.',
           ModuleNotFoundError: 'import한 이름의 철자를 확인하세요. pandas는 준비가 끝나면 사용할 수 있어요.',
           IndexError: '리스트의 첫 위치는 0이에요. 값이 5개라면 인덱스는 0~4인지 확인하세요.',
           IndentationError: 'if·else·for 줄 다음에는 들여쓰기가 필요해요. 안쪽으로 한 단계 들어갈 때마다 공백 네 칸을 넣어보세요.',

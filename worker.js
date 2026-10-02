@@ -1,6 +1,6 @@
 import { loadPyodide } from 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.mjs';
 const send = (type, fields = {}) => self.postMessage({ type, ...fields });
-const allowedFiles = new Set(['study_week.csv', 'reading_week.csv']);
+const allowedFiles = new Set(['study_week.csv', 'reading_week.csv', 'spending_week.csv', 'spending_raw.csv']);
 const fileCache = new Map();
 let runtimePromise;
 function runtime() {
